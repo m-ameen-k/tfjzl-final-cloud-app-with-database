@@ -7,10 +7,10 @@
 </head>
 <body>
 
- <nav class="navbar navbar-light bg-light">
+<nav class="navbar navbar-light bg-light">
     <div class="container-fluid">
         <div class="navbar-header">
-              <a class="navbar-brand" href="{% url 'onlinecourse:index' %}">Home</a>
+            <a class="navbar-brand" href="{% url 'onlinecourse:index' %}">Home</a>
         </div>
         <ul class="nav navbar-nav navbar-right">
             {% if user.is_authenticated %}
@@ -23,8 +23,8 @@
                 <form class="form-inline" action="{% url 'onlinecourse:login' %}" method="post">
                     {% csrf_token %}
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Username" name="username" >
-                        <input type="password" class="form-control" placeholder="Username" name="psw" >
+                        <input type="text" class="form-control" placeholder="Username" name="username">
+                        <input type="password" class="form-control" placeholder="Password" name="psw">
                         <button class="btn btn-primary" type="submit">Login</button>
                         <a class="btn btn-link" href="{% url 'onlinecourse:registration' %}">Sign Up</a>
                     </div>
@@ -37,19 +37,47 @@
 
 <div class="container-fluid">
     {% if grade > 80 %}
-    <div class="alert alert-success">
-       <!--HINT Display passed info -->
+    <div class="alert alert-success mt-3">
+        <strong>Congratulations!</strong> You passed the exam. Your score is {{ grade }}%.
     </div>
-        {% else %}
-        <div class="alert alert-danger">
-            <!--HINT Display failed info -->
-        </div>
-        <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
-        {% endif %}
-        <div class="card-columns-vertical mt-1">
-        <h5 class="">Exam results</h5>
-            <!--HINT Display exam results-->
-        </div>
+    {% else %}
+    <div class="alert alert-danger mt-3">
+        You failed the exam. Your score is {{ grade }}%.
     </div>
+    <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
+    {% endif %}
+
+    <div class="card-columns-vertical mt-3">
+        <h5>Exam results</h5>
+        {% for result in question_results %}
+        <div class="card mt-2">
+            <div class="card-header">
+                <strong>Question {{ forloop.counter }}: {{ result.question.question_text }}</strong>
+            </div>
+            <div class="card-body">
+                {% if result.is_correct %}
+                    <p class="text-success">Correct</p>
+                {% else %}
+                    <p class="text-danger">Incorrect</p>
+                {% endif %}
+
+                <ul>
+                    {% for choice in result.choices %}
+                    <li>
+                        {{ choice.choice_text }}
+                        {% if choice.id in result.selected_ids %}
+                            <strong>(Selected)</strong>
+                        {% endif %}
+                        {% if choice.id in result.correct_ids %}
+                            <span class="text-success">(Correct Answer)</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 </body>
 </html>
